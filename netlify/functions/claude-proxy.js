@@ -6,7 +6,7 @@ exports.handler = async function(event, context) {
 
   // CORS headers — restrict to your Netlify domain
   const headers = {
-    'Access-Control-Allow-Origin': 'https://capable-concha-919a6c.netlify.app',
+    'Access-Control-Allow-Origin': 'https://aesthetic-taffy-142fd3.netlify.app',
     'Access-Control-Allow-Headers': 'Content-Type',
     'Content-Type': 'application/json',
   };
