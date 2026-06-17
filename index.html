@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="en">
 <head>
 <meta charset="UTF-8"/>
@@ -1099,17 +1099,25 @@ async function fetchLiveNewsFromClaude(){
   lastLiveFetch = Date.now();
   setNewsStatus('fetching');
 
+  // Pick 6 random players to check
   const picks = [...PLAYERS].sort(()=>Math.random()-0.5).slice(0,6).map(p=>p.full).join(', ');
 
-  const systemPrompt = `You are a football market data analyst. Use web search to find the LATEST real news (past 48 hours) about these players: ${picks}.
-Search for: goals, assists, injuries, transfer news, suspensions, national team call-ups, manager comments, form.
+  // Inject today's exact date so Claude knows what "recent" means
+  const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-Return ONLY a raw JSON array — no markdown, no code fences. Schema:
-[{"playerName":"exact full name","text":"one factual sentence","type":"goal|injury|transfer|form|callup","delta":-35 to 35,"impact":"e.g. +14% brace vs Arsenal"}]
-
-Delta guide: goal scored=+12 to +18, brace=+18 to +25, injury=−10 to −35, transfer to elite club=+15 to +25, transfer down=−10 to −20, red card/suspension=−10 to −18, call-up=+4 to +10, award/form=+4 to +10.
-Only report real news you found. playerName must exactly match one of: ${PLAYER_NAMES_STR}
-Return 1–6 items max, or [] if nothing found. Start with [ end with ].`;
+  // The strict prompt forcing real, recent news
+  const systemPrompt = `You are a strict financial and sports data analyst. Today's date is ${today}.
+  Use your web search tool to find ACTUAL, REAL news published ONLY within the last 3-4 days about these specific players: ${picks}.
+  
+  CRITICAL RULES:
+  1. You MUST use the web search tool to find real articles.
+  2. Check the publication date of the articles. If the news is more than 5 days old, IGNORE IT completely. Do not report outdated news.
+  3. Do NOT invent or simulate any news. 
+  4. If there is NO recent, real news for a player, ignore them.
+  5. If there is no recent news for ANY of the players, return an empty array: []
+  
+  Return ONLY a raw JSON array. Schema:
+  [{"playerName":"exact full name","text":"one factual sentence based on real news","type":"goal|injury|transfer|form|callup","delta":-35 to 35,"impact":"e.g. +14% brace vs Arsenal"}]`;
 
   try {
     const res = await fetch('/.netlify/functions/claude-proxy', {
@@ -1120,9 +1128,10 @@ Return 1–6 items max, or [] if nothing found. Start with [ end with ].`;
       body: JSON.stringify({
         model: 'claude-3-5-sonnet-20241022',
         max_tokens: 1000,
-        tools: [{type: 'web_search_20250305', name: 'web_search'}],
+        // Turn the real web search tool back on
+        tools: [{type: 'web_search_20250305', name: 'web_search', max_uses: 5}],
         system: systemPrompt,
-        messages: [{role: 'user', content: 'Search for latest football news on those players and return the JSON array.'}]
+        messages: [{role: 'user', content: 'Search the web for real, breaking news on those players and return the JSON array.'}]
       })
     });
 
@@ -1139,23 +1148,36 @@ Return 1–6 items max, or [] if nothing found. Start with [ end with ].`;
     const data = await res.json();
     const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
     const cleaned = textBlocks.replace(/```json|```/g, '').trim();
+    
+    // Handle the case where Claude returned empty/no news
     const si = cleaned.indexOf('['), ei = cleaned.lastIndexOf(']');
-    if(si === -1 || ei === -1){ isFetchingLive = false; setNewsStatus('live'); return true; }
+    if(si === -1 || ei === -1 || cleaned.includes("[]")) { 
+        console.log("No recent real news found for this batch. Relying on market noise.");
+        isFetchingLive = false; 
+        setNewsStatus('live'); 
+        return true; // We return true because the API worked, it just found nothing fresh!
+    }
 
     const items = JSON.parse(cleaned.slice(si, ei+1));
     if(!Array.isArray(items) || items.length === 0){ isFetchingLive = false; setNewsStatus('live'); return true; }
 
     let applied = 0;
     items.forEach(item => {
-      const pid = PLAYER_ID_MAP[item.playerName];
+      // Find the player ID by matching Claude's output to our array
+      let pid = PLAYER_ID_MAP[item.playerName];
+      if (!pid) {
+        const found = PLAYERS.find(p => p.full.includes(item.playerName) || item.playerName.includes(p.name));
+        if (found) pid = found.id;
+      }
+
       if(!pid) return;
       const delta = Math.max(-40, Math.min(40, parseInt(item.delta) || 0));
-      applyNewsEvent({ text: item.text, impact: item.impact || `${delta>=0?'+':''}${delta}% on live news`,
+      applyNewsEvent({ text: item.text, impact: item.impact || `${delta>=0?'+':''}${delta}% on real news`,
         type: item.type || 'form', playerName: item.playerName, pid, delta, source: 'live' });
       applied++;
     });
 
-    console.log(`✅ Live news: ${applied} events`);
+    console.log(`✅ Live real news: ${applied} events`);
     setNewsStatus('live');
     isFetchingLive = false;
     return true;
