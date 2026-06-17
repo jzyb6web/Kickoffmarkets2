@@ -1130,7 +1130,7 @@ Return 1–6 items max, or [] if nothing found. Start with [ end with ].`;
       const err = await res.json().catch(()=>({}));
       const msg = err?.error?.message || `HTTP ${res.status}`;
       console.warn('Claude API error:', msg);
-      if(res.status === 401) setApiKeyStatus('err', 'Invalid API key — check in settings ⚙');
+      if(res.status === 401) showToast('API Error: Invalid API key in Netlify settings');
       else if(res.status === 429) setNewsStatus('rate-limited');
       else setNewsStatus('error');
       isFetchingLive = false; return false;
