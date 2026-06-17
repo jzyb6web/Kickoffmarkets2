@@ -1,0 +1,1259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Kick Off Markets — Footballer Share Exchange</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --gold:#C9A84C;--gold-light:#E2C27D;--gold-dim:#8C6F2F;
+  --gold-bg:rgba(201,168,76,0.08);--gold-border:rgba(201,168,76,0.25);
+  --black:#0A0A0A;--surface:#111111;--surface2:#181818;--surface3:#1F1F1F;
+  --border:rgba(255,255,255,0.07);--border-gold:rgba(201,168,76,0.3);
+  --text:#F5F5F0;--text-muted:rgba(245,245,240,0.5);--text-dim:rgba(245,245,240,0.28);
+  --green:#2ECC8A;--green-dim:rgba(46,204,138,0.12);
+  --red:#E05252;--red-dim:rgba(224,82,82,0.12);
+  --font-display:'Playfair Display',Georgia,serif;
+  --font-body:'Inter',system-ui,sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:6px;--radius-lg:10px;
+}
+html{font-size:14px;}
+body{background:var(--black);color:var(--text);font-family:var(--font-body);min-height:100vh;}
+
+.topbar{background:var(--surface);border-bottom:1px solid var(--border-gold);padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:56px;position:sticky;top:0;z-index:100;}
+.logo{display:flex;align-items:center;gap:10px;}
+.logo-mark{width:32px;height:32px;border:1.5px solid var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;}
+.logo-mark svg{width:18px;height:18px;fill:var(--gold);}
+.logo-wordmark{font-family:var(--font-display);font-size:1.15rem;letter-spacing:0.02em;}
+.logo-wordmark .gold{color:var(--gold);}
+.topbar-right{display:flex;align-items:center;gap:1rem;}
+.season-label{font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);letter-spacing:0.08em;}
+.matchday-pill{font-family:var(--font-mono);font-size:0.68rem;color:var(--gold);background:var(--gold-bg);border:1px solid var(--gold-border);border-radius:99px;padding:3px 10px;letter-spacing:0.06em;}
+.live-pill{font-family:var(--font-mono);font-size:0.65rem;color:var(--green);background:rgba(46,204,138,0.1);border:1px solid rgba(46,204,138,0.3);border-radius:99px;padding:3px 10px;display:flex;align-items:center;gap:5px;}
+.live-dot{width:5px;height:5px;border-radius:50%;background:var(--green);animation:pulse 1.5s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+.ticker-wrap{background:var(--surface2);border-bottom:1px solid var(--border);overflow:hidden;height:30px;display:flex;align-items:center;}
+.ticker-track{display:flex;gap:36px;animation:scroll-ticker 200s linear infinite;white-space:nowrap;padding:0 20px;}
+.ticker-track:hover{animation-play-state:paused;}
+@keyframes scroll-ticker{from{transform:translateX(0);}to{transform:translateX(-50%);}}
+.tick-item{display:flex;align-items:center;gap:7px;font-family:var(--font-mono);font-size:0.68rem;}
+.tick-name{color:var(--text-muted);}
+.tick-price{color:var(--text);font-weight:500;}
+.tick-chg{font-size:0.64rem;padding:1px 5px;border-radius:3px;}
+.tick-up{color:var(--green);background:var(--green-dim);}
+.tick-dn{color:var(--red);background:var(--red-dim);}
+.tick-sep{color:rgba(255,255,255,0.1);font-size:0.6rem;}
+
+.layout{max-width:1300px;margin:0 auto;padding:1.25rem 1.5rem;display:grid;grid-template-columns:1fr 350px;gap:1.25rem;}
+
+.portfolio-strip{grid-column:1/-1;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border-gold);border:1px solid var(--border-gold);border-radius:var(--radius-lg);overflow:hidden;}
+.pstat{background:var(--surface);padding:0.85rem 1.2rem;}
+.pstat-label{font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;}
+.pstat-value{font-family:var(--font-display);font-size:1.4rem;font-weight:700;color:var(--text);}
+.pstat-value.up{color:var(--green);}.pstat-value.dn{color:var(--red);}
+.pstat-sub{font-size:0.65rem;color:var(--text-muted);margin-top:2px;}
+
+.left-panel{display:flex;flex-direction:column;gap:1rem;min-width:0;}
+.tab-bar{display:flex;border-bottom:1px solid var(--border);}
+.tab-btn{background:none;border:none;border-bottom:2px solid transparent;padding:8px 18px;font-family:var(--font-body);font-size:0.75rem;font-weight:500;letter-spacing:0.05em;color:var(--text-muted);cursor:pointer;margin-bottom:-1px;transition:color 0.15s,border-color 0.15s;text-transform:uppercase;}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-btn:hover:not(.active){color:var(--text);}
+
+.market-controls{display:flex;flex-direction:column;gap:8px;}
+.search-wrap{position:relative;}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--text-dim);font-size:0.78rem;pointer-events:none;}
+.search-input{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:8px 10px 8px 30px;color:var(--text);font-family:var(--font-mono);font-size:0.74rem;outline:none;transition:border-color 0.15s;}
+.search-input:focus{border-color:var(--gold-border);}
+.search-input::placeholder{color:var(--text-dim);}
+.league-bar{display:flex;gap:5px;flex-wrap:wrap;}
+.lf-btn{background:none;border:1px solid var(--border);border-radius:4px;padding:4px 10px;font-family:var(--font-mono);font-size:0.62rem;color:var(--text-muted);cursor:pointer;letter-spacing:0.04em;transition:all 0.12s;white-space:nowrap;}
+.lf-btn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);}
+.results-count{font-family:var(--font-mono);font-size:0.62rem;color:var(--text-dim);padding:0 2px;}
+
+.market-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden;max-height:480px;overflow-y:auto;}
+.market-grid::-webkit-scrollbar{width:3px;}.market-grid::-webkit-scrollbar-thumb{background:var(--border);}
+.player-card{background:var(--surface);padding:0.85rem;cursor:pointer;transition:background 0.12s;position:relative;}
+.player-card:hover{background:var(--surface2);}
+.player-card.selected{background:var(--surface2);}
+.player-card.selected::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);}
+.pc-top{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.pc-avatar{width:32px;height:32px;border-radius:50%;border:1.5px solid var(--gold-border);display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:0.68rem;font-weight:700;color:var(--gold);flex-shrink:0;background:var(--gold-bg);}
+.pc-name{font-size:0.8rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pc-club{font-size:0.62rem;color:var(--text-muted);margin-top:1px;font-family:var(--font-mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.pc-pos{font-family:var(--font-mono);font-size:0.56rem;color:var(--gold);background:var(--gold-bg);border:1px solid var(--gold-border);padding:1px 5px;border-radius:3px;flex-shrink:0;}
+.pc-price-row{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:5px;}
+.pc-price{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);}
+.pc-chg{font-family:var(--font-mono);font-size:0.62rem;padding:2px 6px;border-radius:3px;font-weight:500;}
+.pc-chg.up{color:var(--green);background:var(--green-dim);}.pc-chg.dn{color:var(--red);background:var(--red-dim);}
+.pc-holdings{font-family:var(--font-mono);font-size:0.6rem;color:var(--gold-dim);margin-top:3px;}
+.pc-league{font-family:var(--font-mono);font-size:0.56rem;color:var(--text-dim);margin-top:1px;}
+.no-results{grid-column:1/-1;padding:3rem;text-align:center;font-family:var(--font-mono);font-size:0.72rem;color:var(--text-dim);}
+
+.trade-panel{background:var(--surface);border:1px solid var(--border-gold);border-radius:var(--radius-lg);padding:1.1rem;}
+.trade-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:0.8rem;padding-bottom:0.75rem;border-bottom:1px solid var(--border);}
+.trade-player-name{font-family:var(--font-display);font-size:1rem;font-weight:700;color:var(--text);}
+.chart-controls{display:flex;align-items:center;justify-content:space-between;margin-bottom:7px;}
+.ctrl-grp{display:flex;gap:3px;}
+.ctrl-btn{background:none;border:1px solid transparent;border-radius:4px;padding:3px 8px;font-family:var(--font-mono);font-size:0.64rem;color:var(--text-muted);cursor:pointer;letter-spacing:0.04em;transition:all 0.12s;}
+.ctrl-btn.active{background:var(--gold-bg);border-color:var(--gold-border);color:var(--gold);}
+.chart-box{background:var(--surface2);border-radius:var(--radius);padding:8px 6px;margin-bottom:0.85rem;overflow:hidden;}
+.trade-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:0.7rem;}
+.trade-field label{display:block;font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:4px;}
+.trade-field input,.trade-field select{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:7px 10px;color:var(--text);font-family:var(--font-mono);font-size:0.76rem;outline:none;transition:border-color 0.15s;}
+.trade-field input:focus,.trade-field select:focus{border-color:var(--gold-border);}
+.trade-field select option{background:var(--surface3);}
+.trade-cost-line{font-family:var(--font-mono);font-size:0.68rem;color:var(--text-muted);margin-bottom:0.7rem;padding:7px 10px;background:var(--surface2);border-radius:var(--radius);display:flex;justify-content:space-between;}
+.trade-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.btn-buy{background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);padding:9px;font-family:var(--font-body);font-size:0.74rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
+.btn-buy:hover{background:var(--gold-light);}
+.btn-sell{background:transparent;color:var(--red);border:1px solid rgba(224,82,82,0.4);border-radius:var(--radius);padding:9px;font-family:var(--font-body);font-size:0.74rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
+.btn-sell:hover{background:var(--red-dim);}
+.empty-trade{text-align:center;padding:2.5rem;color:var(--text-dim);font-size:0.76rem;font-family:var(--font-mono);}
+.empty-trade .icon{font-size:2rem;display:block;margin-bottom:0.5rem;opacity:0.25;}
+
+.right-panel{display:flex;flex-direction:column;gap:1.25rem;}
+.section-head{display:flex;align-items:center;gap:10px;margin-bottom:0.75rem;}
+.section-title{font-family:var(--font-mono);font-size:0.62rem;color:var(--gold);letter-spacing:0.12em;text-transform:uppercase;white-space:nowrap;}
+.section-rule{flex:1;height:1px;background:var(--border);}
+
+.news-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);}
+.news-item{background:var(--surface);padding:0.8rem 0.9rem;display:flex;gap:10px;align-items:flex-start;}
+.news-dot{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0;}
+.dot-goal{background:var(--green);}.dot-injury{background:var(--red);}.dot-transfer{background:var(--gold);}.dot-form{background:#A78BFA;}.dot-callup{background:#60A5FA;}
+.news-body{flex:1;min-width:0;}
+.news-type{font-family:var(--font-mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:3px;}
+.nt-goal{color:var(--green);}.nt-injury{color:var(--red);}.nt-transfer{color:var(--gold);}.nt-form{color:#A78BFA;}.nt-callup{color:#60A5FA;}
+.news-text{font-size:0.76rem;color:var(--text);line-height:1.5;}
+.news-impact{font-size:0.65rem;color:var(--text-muted);margin-top:3px;font-family:var(--font-mono);}
+.news-player-tag{font-family:var(--font-mono);font-size:0.6rem;color:var(--gold-dim);margin-top:3px;}
+.news-empty{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;text-align:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);}
+
+.holdings-list{display:flex;flex-direction:column;gap:1px;background:var(--border);border-radius:var(--radius-lg);overflow:hidden;border:1px solid var(--border);}
+.holding{background:var(--surface);padding:0.8rem 0.9rem;display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;}
+.holding-name{font-size:0.8rem;font-weight:600;color:var(--text);}
+.holding-meta{font-family:var(--font-mono);font-size:0.62rem;color:var(--text-muted);margin-top:2px;}
+.holding-value{font-family:var(--font-display);font-size:0.9rem;font-weight:700;text-align:right;}
+.holding-pnl{font-family:var(--font-mono);font-size:0.65rem;text-align:right;margin-top:2px;}
+.txt-up{color:var(--green);}.txt-dn{color:var(--red);}
+.holdings-empty{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2.5rem;text-align:center;font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--surface);border:1px solid var(--border-gold);border-radius:var(--radius);padding:9px 18px;font-family:var(--font-mono);font-size:0.72rem;color:var(--gold);opacity:0;transition:opacity 0.25s,transform 0.25s;pointer-events:none;z-index:999;white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+/* ── API SETTINGS ── */
+.gear-btn{background:none;border:1px solid var(--border);border-radius:var(--radius);padding:5px 9px;color:var(--text-muted);font-size:0.85rem;cursor:pointer;transition:all 0.15s;line-height:1;}
+.gear-btn:hover{border-color:var(--gold-border);color:var(--gold);}
+.gear-btn.api-active{border-color:var(--gold-border);color:var(--gold);background:var(--gold-bg);}
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;display:flex;align-items:center;justify-content:center;padding:1rem;}
+.modal-overlay.hidden{display:none;}
+.modal{background:var(--surface);border:1px solid var(--border-gold);border-radius:var(--radius-lg);padding:1.5rem;width:100%;max-width:480px;}
+.modal-title{font-family:var(--font-display);font-size:1.05rem;font-weight:700;color:var(--text);margin-bottom:0.3rem;}
+.modal-sub{font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-bottom:1.2rem;line-height:1.6;}
+.modal-label{font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:5px;display:block;}
+.modal-input{width:100%;background:var(--surface3);border:1px solid var(--border);border-radius:var(--radius);padding:9px 12px;color:var(--text);font-family:var(--font-mono);font-size:0.76rem;outline:none;transition:border-color 0.15s;margin-bottom:1rem;}
+.modal-input:focus{border-color:var(--gold-border);}
+.modal-row{display:flex;gap:8px;}
+.modal-btn-primary{flex:1;background:var(--gold);color:var(--black);border:none;border-radius:var(--radius);padding:9px;font-family:var(--font-body);font-size:0.74rem;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;cursor:pointer;transition:background 0.15s;}
+.modal-btn-primary:hover{background:var(--gold-light);}
+.modal-btn-secondary{background:transparent;color:var(--text-muted);border:1px solid var(--border);border-radius:var(--radius);padding:9px 16px;font-family:var(--font-body);font-size:0.74rem;cursor:pointer;}
+.modal-btn-secondary:hover{border-color:var(--border-gold);color:var(--text);}
+.modal-status{font-family:var(--font-mono);font-size:0.65rem;margin-top:0.75rem;padding:7px 10px;border-radius:var(--radius);display:none;}
+.modal-status.ok{background:var(--green-dim);color:var(--green);display:block;}
+.modal-status.err{background:var(--red-dim);color:var(--red);display:block;}
+.api-source-badge{font-family:var(--font-mono);font-size:0.6rem;padding:2px 7px;border-radius:3px;margin-left:6px;}
+.badge-live{background:rgba(46,204,138,0.15);color:var(--green);border:1px solid rgba(46,204,138,0.3);}
+.badge-sim{background:var(--gold-bg);color:var(--gold-dim);border:1px solid var(--gold-border);}
+
+@media(max-width:960px){.layout{grid-template-columns:1fr;}.right-panel{order:-1;}.portfolio-strip{grid-template-columns:1fr 1fr;}}
+@media(max-width:540px){.market-grid{grid-template-columns:1fr;}.portfolio-strip{grid-template-columns:1fr 1fr;}.topbar-right .season-label{display:none;}}
+::-webkit-scrollbar{width:3px;height:3px;}::-webkit-scrollbar-track{background:transparent;}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<header class="topbar">
+  <div class="logo">
+    <div class="logo-mark">
+      <svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 2c1.34 0 2.6.34 3.7.93L14 6.5l-2 1.5-2-1.5-1.7-1.57A7.94 7.94 0 0 1 12 4zm-6.93 5.3L7 10.5l-.5 3 2 1.5v2.5A7.96 7.96 0 0 1 4 12c0-1.02.19-1.99.52-2.9l.55.2zM12 20a7.96 7.96 0 0 1-4.5-1.38V16l2-1.5 1 .5 1-.5 2 1.5v2.62A7.96 7.96 0 0 1 12 20zm6.5-2.88V17.5l-.5-3 1.93-1.2.55-.2c.33.91.52 1.88.52 2.9 0 1.68-.52 3.24-1.41 4.52l-.07-.05zM17 10.5l1.93-1.2A8.02 8.02 0 0 0 15.7 5.43L14 6.5l-2-1.5-2 1.5-1.7-1.07A7.98 7.98 0 0 0 7 10.5l1 .5-.5 3 1.5 1 1-.5 1 .5 1.5-1-.5-3 1-.5z"/></svg>
+    </div>
+    <span class="logo-wordmark">Kick Off <span class="gold">Markets</span></span>
+  </div>
+  <div class="topbar-right">
+    <span class="season-label">2025/26</span>
+    <span id="save-badge" style="font-family:var(--font-mono);font-size:0.62rem;color:var(--green);transition:opacity 1s;opacity:0;white-space:nowrap;"></span>
+
+    <span class="live-pill"><span class="live-dot"></span>LIVE</span>
+    <span class="matchday-pill" id="matchday-pill">MD 36</span>
+    <button class="gear-btn" onclick="resetProgress()" title="Reset Progress" style="font-size:0.65rem;padding:5px 8px;color:var(--text-dim)">↺ Reset</button>
+
+  </div>
+</header>
+
+<!-- API key handled server-side via Netlify function -->
+
+<div class="ticker-wrap"><div class="ticker-track" id="ticker-track"></div></div>
+
+<main class="layout">
+  <div class="portfolio-strip">
+    <div class="pstat"><div class="pstat-label">Cash</div><div class="pstat-value" id="s-cash">$10,000</div><div class="pstat-sub">Available</div></div>
+    <div class="pstat"><div class="pstat-label">Portfolio</div><div class="pstat-value" id="s-port">$0</div><div class="pstat-sub">Market value</div></div>
+    <div class="pstat"><div class="pstat-label">Total</div><div class="pstat-value" id="s-total">$10,000</div><div class="pstat-sub">Cash + holdings</div></div>
+    <div class="pstat"><div class="pstat-label">P&amp;L</div><div class="pstat-value" id="s-pnl">—</div><div class="pstat-sub">vs $10,000 start</div></div>
+  </div>
+
+  <div class="left-panel">
+    <div class="tab-bar">
+      <button class="tab-btn active" onclick="switchTab('market',this)">Market</button>
+      <button class="tab-btn" onclick="switchTab('portfolio',this)">My Squad</button>
+    </div>
+    <div id="tab-market">
+      <div class="market-controls">
+        <div class="search-wrap">
+          <span class="search-icon">⌕</span>
+          <input class="search-input" id="search-input" type="text" placeholder="Search player, club or position…" oninput="renderMarket()"/>
+        </div>
+        <div class="league-bar" id="league-bar"></div>
+        <div class="results-count" id="results-count"></div>
+      </div>
+      <div class="market-grid" id="player-grid"></div>
+      <div id="trade-area" style="margin-top:1rem"></div>
+    </div>
+    <div id="tab-portfolio" style="display:none">
+      <div class="section-head" style="margin-top:0.25rem">
+        <span class="section-title">Holdings</span><div class="section-rule"></div>
+      </div>
+      <div id="holdings-list"></div>
+    </div>
+  </div>
+
+  <div class="right-panel">
+    <div class="section-head">
+      <span class="section-title">Live News Feed</span><div class="section-rule"></div>
+      <span id="news-status" style="font-family:var(--font-mono);font-size:0.6rem;color:var(--text-dim);white-space:nowrap;"></span>
+    </div>
+    <div id="news-panel"><div class="news-empty">Generating first news event…</div></div>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════
+//  TEAM TIER RATINGS — used for transfer price impact
+//  1 = elite (Real Madrid, Man City, PSG, Bayern)
+//  2 = top (Arsenal, Liverpool, Chelsea, Barca, Inter, Dortmund)
+//  3 = mid-top (Atletico, Newcastle, Leverkusen, Napoli, Lyon)
+//  4 = mid (Aston Villa, West Ham, AC Milan, Lazio, Sevilla)
+//  5 = lower (Wolves, Bournemouth, Frosinone, Augsburg, etc.)
+// ═══════════════════════════════════════════════════════════════
+const TEAM_TIERS = {
+  'Real Madrid':1,'Man City':1,'PSG':1,'Bayern Munich':1,
+  'Arsenal':2,'Liverpool':2,'Chelsea':2,'Barcelona':2,'Inter Milan':2,'Borussia Dortmund':2,'Man Utd':2,
+  'Atletico Madrid':3,'Newcastle':3,'Bayer Leverkusen':3,'Napoli':3,'Lyon':3,'Tottenham':3,'RB Leipzig':3,
+  'Aston Villa':4,'West Ham':4,'AC Milan':4,'Lazio':4,'Sevilla':4,'Juventus':4,'Roma':4,'Marseille':4,'Fiorentina':4,
+  'Brentford':4,'Fulham':4,'Crystal Palace':4,'Valencia':4,'Real Sociedad':4,'Athletic Bilbao':4,
+  'Bournemouth':5,'Wolves':5,'Galatasaray':5,'Augsburg':5,'Frosinone':5,'Lecce':5,'Montpellier':5,'Lorient':5,'Lille':3,
+};
+function getTeamTier(club){ return TEAM_TIERS[club] || 3; }
+function transferDelta(fromClub, toClub){
+  const from = getTeamTier(fromClub), to = getTeamTier(toClub);
+  const diff = from - to; // positive = moving UP (better team)
+  if(diff >= 2) return +22;
+  if(diff === 1) return +12;
+  if(diff === 0) return +3;
+  if(diff === -1) return -10;
+  if(diff <= -2) return -20;
+  return 0;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PLAYER ROSTER — 85 players, top 5 leagues
+// ═══════════════════════════════════════════════════════════════
+const PLAYERS = [
+  // ── PREMIER LEAGUE ──
+  {id:'haa', name:'E. Haaland',    full:'Erling Haaland',         club:'Man City',      pos:'FW', league:'Premier League', init:'EH', base:290, vol:1.4},
+  {id:'sak', name:'B. Saka',       full:'Bukayo Saka',            club:'Arsenal',       pos:'FW', league:'Premier League', init:'BS', base:195, vol:1.2},
+  {id:'ode', name:'M. Ødegaard',   full:'Martin Ødegaard',        club:'Arsenal',       pos:'MF', league:'Premier League', init:'MO', base:180, vol:1.1},
+  {id:'ric', name:'D. Rice',       full:'Declan Rice',            club:'Arsenal',       pos:'MF', league:'Premier League', init:'DR', base:170, vol:1.1},
+  {id:'gyk', name:'V. Gyökeres',   full:'Viktor Gyökeres',        club:'Arsenal',       pos:'FW', league:'Premier League', init:'VG', base:185, vol:1.5},
+  {id:'hav', name:'K. Havertz',    full:'Kai Havertz',            club:'Arsenal',       pos:'FW', league:'Premier League', init:'KH', base:150, vol:1.3},
+  {id:'fod', name:'P. Foden',      full:'Phil Foden',             club:'Man City',      pos:'MF', league:'Premier League', init:'PF', base:205, vol:1.3},
+  {id:'bsi', name:'B. Silva',      full:'Bernardo Silva',         club:'Man City',      pos:'MF', league:'Premier League', init:'BN', base:175, vol:1.1},
+  {id:'gvd', name:'J. Gvardiol',   full:'Joško Gvardiol',         club:'Man City',      pos:'DF', league:'Premier League', init:'JG', base:130, vol:1.1},
+  {id:'mmo', name:'O. Marmoush',   full:'Omar Marmoush',          club:'Man City',      pos:'FW', league:'Premier League', init:'OM', base:160, vol:1.4},
+  {id:'pal', name:'C. Palmer',     full:'Cole Palmer',            club:'Chelsea',       pos:'MF', league:'Premier League', init:'CP', base:215, vol:1.3},
+  {id:'jpd', name:'J. Pedro',      full:'João Pedro',             club:'Chelsea',       pos:'FW', league:'Premier League', init:'JP', base:145, vol:1.4},
+  {id:'sal', name:'M. Salah',      full:'Mohamed Salah',          club:'Liverpool',     pos:'FW', league:'Premier League', init:'MS', base:200, vol:1.1},
+  {id:'gak', name:'C. Gakpo',      full:'Cody Gakpo',             club:'Liverpool',     pos:'FW', league:'Premier League', init:'CG', base:155, vol:1.3},
+  {id:'isa', name:'A. Isak',       full:'Alexander Isak',         club:'Newcastle',     pos:'FW', league:'Premier League', init:'AI', base:190, vol:1.4},
+  {id:'mbe', name:'B. Mbeumo',     full:'Bryan Mbeumo',           club:'Brentford',     pos:'FW', league:'Premier League', init:'BM', base:140, vol:1.5},
+  {id:'wts', name:'O. Watkins',    full:'Ollie Watkins',          club:'Aston Villa',   pos:'FW', league:'Premier League', init:'OW', base:135, vol:1.3},
+  {id:'bru', name:'B. Fernandes',  full:'Bruno Fernandes',        club:'Man Utd',       pos:'MF', league:'Premier League', init:'BF', base:155, vol:1.3},
+  {id:'ses', name:'B. Sesko',      full:'Benjamin Sesko',         club:'Man Utd',       pos:'FW', league:'Premier League', init:'BK', base:145, vol:1.5},
+  {id:'sem', name:'A. Semenyo',    full:'Antoine Semenyo',        club:'Bournemouth',   pos:'FW', league:'Premier League', init:'AS', base:110, vol:1.6},
+  {id:'mac', name:'K. Mac Allister',full:'Alexis Mac Allister',   club:'Liverpool',     pos:'MF', league:'Premier League', init:'AM', base:145, vol:1.1},
+  {id:'taa', name:'T. Alexander-Arnold',full:'Trent Alexander-Arnold',club:'Liverpool', pos:'DF', league:'Premier League', init:'TA', base:155, vol:1.1},
+  {id:'rsh', name:'M. Rashford',   full:'Marcus Rashford',        club:'Man Utd',       pos:'FW', league:'Premier League', init:'MR', base:130, vol:1.5},
+  {id:'msa', name:'M. Saka',       full:'Martin Ødegaard',        club:'Arsenal',       pos:'MF', league:'Premier League', init:'JT', base:140, vol:1.2},
+  {id:'jwi', name:'J. Wilson',     full:'Callum Wilson',          club:'Newcastle',     pos:'FW', league:'Premier League', init:'CW', base:95, vol:1.4},
+  {id:'mun', name:'S. Mané',       full:'Sadio Mané',             club:'Aston Villa',   pos:'FW', league:'Premier League', init:'SM', base:90, vol:1.3},
+  {id:'eze', name:'E. Eze',        full:'Eberechi Eze',           club:'Crystal Palace',pos:'MF', league:'Premier League', init:'EE', base:120, vol:1.4},
+  {id:'mnt', name:'M. Mount',      full:'Mason Mount',            club:'Man Utd',       pos:'MF', league:'Premier League', init:'MM', base:100, vol:1.5},
+  {id:'arn', name:'J. Arnie',      full:'Jarrod Bowen',           club:'West Ham',      pos:'FW', league:'Premier League', init:'JB', base:115, vol:1.3},
+  {id:'wpk', name:'W. Pedro',      full:'Pedro Porro',            club:'Tottenham',     pos:'DF', league:'Premier League', init:'PP', base:105, vol:1.2},
+
+  // ── LA LIGA ──
+  {id:'mbp', name:'K. Mbappé',     full:'Kylian Mbappé',          club:'Real Madrid',   pos:'FW', league:'La Liga',        init:'KM', base:330, vol:1.3},
+  {id:'vin', name:'Vinícius Jr',   full:'Vinícius Júnior',        club:'Real Madrid',   pos:'FW', league:'La Liga',        init:'VJ', base:320, vol:1.4},
+  {id:'bel', name:'J. Bellingham', full:'Jude Bellingham',        club:'Real Madrid',   pos:'MF', league:'La Liga',        init:'JB', base:250, vol:1.2},
+  {id:'val', name:'F. Valverde',   full:'Federico Valverde',      club:'Real Madrid',   pos:'MF', league:'La Liga',        init:'FV', base:180, vol:1.1},
+  {id:'cam', name:'E. Camavinga',  full:'Eduardo Camavinga',      club:'Real Madrid',   pos:'MF', league:'La Liga',        init:'EC', base:145, vol:1.2},
+  {id:'yam', name:'L. Yamal',      full:'Lamine Yamal',           club:'Barcelona',     pos:'FW', league:'La Liga',        init:'LY', base:275, vol:1.5},
+  {id:'ped', name:'Pedri',         full:'Pedri',                  club:'Barcelona',     pos:'MF', league:'La Liga',        init:'PE', base:205, vol:1.1},
+  {id:'rap', name:'Raphinha',      full:'Raphinha',               club:'Barcelona',     pos:'FW', league:'La Liga',        init:'RA', base:190, vol:1.3},
+  {id:'ter', name:'M. ter Stegen', full:'Marc ter Stegen',        club:'Barcelona',     pos:'GK', league:'La Liga',        init:'MT', base:120, vol:0.9},
+  {id:'gri', name:'A. Griezmann',  full:'Antoine Griezmann',      club:'Atletico Madrid',pos:'FW',league:'La Liga',        init:'AG', base:140, vol:1.1},
+  {id:'obl', name:'J. Oblak',      full:'Jan Oblak',              club:'Atletico Madrid',pos:'GK',league:'La Liga',        init:'JO', base:110, vol:0.8},
+  {id:'gsi', name:'G. Simeone',    full:'Giuliano Simeone',       club:'Atletico Madrid',pos:'FW',league:'La Liga',        init:'GS', base:100, vol:1.7},
+  {id:'mdv', name:'D. Ceballos',   full:'Dani Ceballos',          club:'Real Madrid',   pos:'MF', league:'La Liga',        init:'DC', base:95, vol:1.2},
+  {id:'abr', name:'E. García',     full:'Eric García',            club:'Barcelona',     pos:'DF', league:'La Liga',        init:'EG', base:90, vol:1.0},
+  {id:'cor', name:'M. Correa',     full:'Ángel Correa',           club:'Atletico Madrid',pos:'FW',league:'La Liga',        init:'AC', base:100, vol:1.3},
+
+  // ── BUNDESLIGA ──
+  {id:'mus', name:'J. Musiala',    full:'Jamal Musiala',          club:'Bayern Munich', pos:'MF', league:'Bundesliga',     init:'JM', base:220, vol:1.3},
+  {id:'wir', name:'F. Wirtz',      full:'Florian Wirtz',          club:'Bayer Leverkusen',pos:'MF',league:'Bundesliga',   init:'FW', base:235, vol:1.4},
+  {id:'ndk', name:'K. Adeyemi',    full:'Karim Adeyemi',          club:'Borussia Dortmund',pos:'FW',league:'Bundesliga',  init:'KA', base:130, vol:1.5},
+  {id:'gna', name:'S. Gnabry',     full:'Serge Gnabry',           club:'Bayern Munich', pos:'FW', league:'Bundesliga',     init:'SG', base:115, vol:1.4},
+  {id:'dav', name:'A. Davies',     full:'Alphonso Davies',        club:'Bayern Munich', pos:'DF', league:'Bundesliga',     init:'AD', base:130, vol:1.2},
+  {id:'xha', name:'G. Xhaka',      full:'Granit Xhaka',           club:'Bayer Leverkusen',pos:'MF',league:'Bundesliga',   init:'GX', base:100, vol:1.0},
+  {id:'gri2',name:'R. Grimaldo',   full:'Alejandro Grimaldo',     club:'Bayer Leverkusen',pos:'DF',league:'Bundesliga',   init:'GR', base:120, vol:1.2},
+  {id:'tah', name:'J. Tah',        full:'Jonathan Tah',           club:'Bayern Munich', pos:'DF', league:'Bundesliga',     init:'JT', base:95,  vol:1.0},
+  {id:'ter2',name:'L. Tella',      full:'Nathan Tella',           club:'Bayer Leverkusen',pos:'FW',league:'Bundesliga',   init:'NT', base:85,  vol:1.5},
+  {id:'grb', name:'R. Guerreiro',  full:'Raphaël Guerreiro',      club:'Bayern Munich', pos:'DF', league:'Bundesliga',     init:'RG', base:100, vol:1.1},
+  {id:'hum', name:'T. Müller',     full:'Thomas Müller',          club:'Bayern Munich', pos:'FW', league:'Bundesliga',     init:'TM', base:120, vol:1.0},
+  {id:'bkd', name:'F. Bensebaini', full:'Ramy Bensebaini',        club:'Borussia Dortmund',pos:'DF',league:'Bundesliga',  init:'RB', base:85, vol:1.2},
+  {id:'bry', name:'G. Brandt',     full:'Julian Brandt',          club:'Borussia Dortmund',pos:'MF',league:'Bundesliga',  init:'JBR', base:110, vol:1.2},
+
+  // ── SERIE A ──
+  {id:'ins', name:'L. Martínez',   full:'Lautaro Martínez',       club:'Inter Milan',   pos:'FW', league:'Serie A',        init:'LM', base:195, vol:1.3},
+  {id:'brl', name:'N. Barella',    full:'Nicolò Barella',         club:'Inter Milan',   pos:'MF', league:'Serie A',        init:'NB', base:155, vol:1.1},
+  {id:'fra', name:'D. Frattesi',   full:'Davide Frattesi',        club:'Inter Milan',   pos:'MF', league:'Serie A',        init:'DF', base:110, vol:1.4},
+  {id:'dib', name:'P. Dybala',     full:'Paulo Dybala',           club:'Roma',          pos:'FW', league:'Serie A',        init:'PD', base:115, vol:1.6},
+  {id:'kvr', name:'K. Kvara',      full:'Khvicha Kvaratskhelia',  club:'PSG',           pos:'FW', league:'Serie A',        init:'KK', base:195, vol:1.4},
+  {id:'osi', name:'V. Osimhen',    full:'Victor Osimhen',         club:'Galatasaray',   pos:'FW', league:'Serie A',        init:'VO', base:175, vol:1.5},
+  {id:'mil', name:'F. Dimarco',    full:'Federico Dimarco',       club:'Inter Milan',   pos:'DF', league:'Serie A',        init:'FD', base:100, vol:1.2},
+  {id:'pha', name:'G. Raspadori',  full:'Giacomo Raspadori',      club:'Napoli',        pos:'FW', league:'Serie A',        init:'GR', base:105, vol:1.4},
+  {id:'pul', name:'C. Pulisic',    full:'Christian Pulisic',      club:'AC Milan',      pos:'FW', league:'Serie A',        init:'CPU', base:130, vol:1.4},
+  {id:'zac', name:'N. Zaccagni',   full:'Mattia Zaccagni',        club:'Lazio',         pos:'FW', league:'Serie A',        init:'MZ', base:110, vol:1.3},
+  {id:'vla', name:'D. Vlahović',   full:'Dušan Vlahović',         club:'Juventus',      pos:'FW', league:'Serie A',        init:'DV', base:155, vol:1.4},
+  {id:'sch', name:'R. Leão',       full:'Rafael Leão',            club:'AC Milan',      pos:'FW', league:'Serie A',        init:'RL', base:145, vol:1.4},
+  {id:'the', name:'T. Hernández',  full:'Theo Hernández',         club:'AC Milan',      pos:'DF', league:'Serie A',        init:'TH', base:130, vol:1.3},
+  {id:'dlo', name:'D. Lukaku',     full:'Romelu Lukaku',          club:'Napoli',        pos:'FW', league:'Serie A',        init:'RLU', base:120, vol:1.4},
+
+  // ── LIGUE 1 ──
+  {id:'vit', name:'Vitinha',       full:'Vitinha',                club:'PSG',           pos:'MF', league:'Ligue 1',        init:'VI', base:175, vol:1.2},
+  {id:'dem', name:'O. Dembélé',    full:'Ousmane Dembélé',        club:'PSG',           pos:'FW', league:'Ligue 1',        init:'OD', base:170, vol:1.4},
+  {id:'bar2',name:'B. Barcola',    full:'Bradley Barcola',        club:'PSG',           pos:'FW', league:'Ligue 1',        init:'BB', base:140, vol:1.5},
+  {id:'zai', name:'W. Zaïre-Emery',full:'Warren Zaïre-Emery',    club:'PSG',           pos:'MF', league:'Ligue 1',        init:'WZ', base:120, vol:1.5},
+  {id:'gon', name:'G. Ramos',      full:'Gonçalo Ramos',          club:'PSG',           pos:'FW', league:'Ligue 1',        init:'GRA', base:125, vol:1.4},
+  {id:'nmn', name:'N. Mendes',     full:'Nuno Mendes',            club:'PSG',           pos:'DF', league:'Ligue 1',        init:'NM', base:130, vol:1.2},
+  {id:'che', name:'R. Cherki',     full:'Rayan Cherki',           club:'Man City',      pos:'MF', league:'Ligue 1',        init:'RC', base:115, vol:1.6},
+  {id:'bou', name:'A. Bouaddi',    full:'Ayyoub Bouaddi',         club:'Lille',         pos:'MF', league:'Ligue 1',        init:'AB', base:95,  vol:1.7},
+  {id:'mba', name:'D. Doué',       full:'Désiré Doué',            club:'PSG',           pos:'FW', league:'Ligue 1',        init:'DD', base:110, vol:1.6},
+  {id:'lop', name:'P. Sarabia',    full:'Pablo Sarabia',          club:'PSG',           pos:'FW', league:'Ligue 1',        init:'PS', base:80,  vol:1.3},
+  {id:'sol', name:'L. Sow',        full:'Lamine Sow',             club:'Lille',         pos:'MF', league:'Ligue 1',        init:'LS', base:85, vol:1.5},
+  {id:'and', name:'B. André',      full:'Benjamin André',         club:'Lille',         pos:'MF', league:'Ligue 1',        init:'BA', base:75, vol:1.1},
+];
+
+const LEAGUES = ['All', 'Premier League', 'La Liga', 'Bundesliga', 'Serie A', 'Ligue 1'];
+const TIMEFRAMES = [{key:'1D',label:'1D'},{key:'1W',label:'1W'},{key:'1M',label:'1M'},{key:'3M',label:'3M'},{key:'1Y',label:'1Y'},{key:'5Y',label:'5Y'}];
+const TYPE_CLASS  = {goal:'nt-goal',injury:'nt-injury',transfer:'nt-transfer',form:'nt-form',callup:'nt-callup'};
+const DOT_CLASS   = {goal:'dot-goal',injury:'dot-injury',transfer:'dot-transfer',form:'dot-form',callup:'dot-callup'};
+const TYPE_LABEL  = {goal:'⚽ Goal',injury:'🚑 Injury',transfer:'🔄 Transfer',form:'📈 Form',callup:'🌍 Call-Up'};
+
+// ── CAREER PROFILES (5Y shape: oldest→newest) ──
+// Semenyo: strong 5Y rise, past year especially good
+const CAREER_PROFILES = {
+  haa: {shape:[0.70,0.80,0.91,0.98,1.05,1.08]},
+  sak: {shape:[0.55,0.68,0.80,0.90,0.97,1.00]},
+  ode: {shape:[0.65,0.78,0.82,0.72,0.90,1.00]},
+  ric: {shape:[0.62,0.73,0.83,0.91,0.97,1.00]},
+  gyk: {shape:[0.30,0.45,0.62,0.80,0.95,1.00]},
+  hav: {shape:[0.65,0.75,0.68,0.82,0.90,1.00]},
+  fod: {shape:[0.68,0.78,0.88,0.97,1.02,1.00]},
+  bsi: {shape:[1.05,1.03,1.01,0.99,0.97,1.00]},
+  gvd: {shape:[0.50,0.65,0.78,0.88,0.96,1.00]},
+  mmo: {shape:[0.30,0.45,0.62,0.80,0.94,1.00]},
+  pal: {shape:[0.32,0.50,0.68,0.84,0.96,1.00]},
+  jpd: {shape:[0.48,0.60,0.73,0.85,0.95,1.00]},
+  sal: {shape:[1.06,1.04,1.02,1.00,0.98,1.00]},
+  gak: {shape:[0.55,0.68,0.62,0.78,0.90,1.00]},
+  isa: {shape:[0.55,0.68,0.80,0.90,0.97,1.00]},
+  mbe: {shape:[0.38,0.54,0.70,0.83,0.95,1.00]},
+  wts: {shape:[0.70,0.80,0.90,0.96,1.00,1.00]},
+  bru: {shape:[1.02,1.00,0.98,0.96,0.97,1.00]},
+  ses: {shape:[0.33,0.48,0.65,0.82,0.94,1.00]},
+  // Semenyo — breakout 5 years, massive past year surge → should show strongly upward
+  sem: {shape:[0.28,0.42,0.58,0.74,0.90,1.00]},
+  mac: {shape:[0.60,0.72,0.83,0.92,0.98,1.00]},
+  taa: {shape:[0.72,0.83,0.91,0.97,1.00,1.00]},
+  rsh: {shape:[1.05,1.00,0.88,0.75,0.82,1.00]},
+  msa: {shape:[0.60,0.72,0.82,0.90,0.97,1.00]},
+  jwi: {shape:[1.02,0.98,0.88,0.78,0.85,1.00]},
+  mun: {shape:[1.10,1.02,0.90,0.80,0.85,1.00]},
+  eze: {shape:[0.45,0.60,0.73,0.85,0.95,1.00]},
+  mnt: {shape:[1.08,0.98,0.80,0.68,0.82,1.00]},
+  arn: {shape:[0.58,0.70,0.81,0.90,0.97,1.00]},
+  wpk: {shape:[0.52,0.65,0.78,0.88,0.96,1.00]},
+  mbp: {shape:[0.72,0.83,0.92,0.98,1.02,1.00]},
+  vin: {shape:[0.68,0.80,0.90,0.97,1.02,1.00]},
+  bel: {shape:[0.50,0.65,0.78,0.88,0.96,1.00]},
+  val: {shape:[0.76,0.85,0.92,0.97,1.00,1.00]},
+  cam: {shape:[0.48,0.62,0.76,0.87,0.96,1.00]},
+  yam: {shape:[0.18,0.32,0.55,0.76,0.93,1.00]},
+  ped: {shape:[0.60,0.78,0.70,0.83,0.93,1.00]},
+  rap: {shape:[0.70,0.80,0.89,0.96,1.00,1.00]},
+  ter: {shape:[0.86,0.93,0.70,0.58,0.88,1.00]},
+  gri: {shape:[1.15,1.08,1.00,0.88,0.82,1.00]},
+  obl: {shape:[1.04,1.02,1.00,0.98,0.97,1.00]},
+  gsi: {shape:[0.25,0.40,0.60,0.78,0.93,1.00]},
+  mdv: {shape:[0.70,0.80,0.90,0.96,0.99,1.00]},
+  abr: {shape:[0.60,0.72,0.82,0.90,0.97,1.00]},
+  cor: {shape:[1.02,0.98,0.95,0.92,0.95,1.00]},
+  mus: {shape:[0.48,0.62,0.76,0.88,0.96,1.00]},
+  wir: {shape:[0.38,0.55,0.72,0.86,0.96,1.00]},
+  ndk: {shape:[0.60,0.72,0.65,0.82,0.93,1.00]},
+  gna: {shape:[1.08,1.03,0.97,0.91,0.88,1.00]},
+  dav: {shape:[0.70,0.81,0.90,0.97,1.00,1.00]},
+  xha: {shape:[1.01,0.99,0.97,0.96,0.97,1.00]},
+  gri2:{shape:[0.58,0.71,0.82,0.90,0.97,1.00]},
+  tah: {shape:[0.76,0.85,0.92,0.97,0.99,1.00]},
+  ter2:{shape:[0.45,0.60,0.74,0.86,0.95,1.00]},
+  grb: {shape:[0.70,0.80,0.88,0.95,0.99,1.00]},
+  hum: {shape:[1.10,1.06,1.02,0.99,0.97,1.00]},
+  bkd: {shape:[0.60,0.72,0.82,0.90,0.97,1.00]},
+  bry: {shape:[0.70,0.80,0.88,0.95,0.99,1.00]},
+  ins: {shape:[0.73,0.83,0.92,0.98,1.00,1.00]},
+  brl: {shape:[0.71,0.81,0.90,0.97,1.00,1.00]},
+  fra: {shape:[0.50,0.63,0.76,0.87,0.96,1.00]},
+  dib: {shape:[1.22,1.10,0.93,0.80,0.87,1.00]},
+  kvr: {shape:[0.45,0.61,0.76,0.88,0.97,1.00]},
+  osi: {shape:[0.78,1.02,0.88,0.73,0.86,1.00]},
+  mil: {shape:[0.53,0.66,0.79,0.88,0.96,1.00]},
+  pha: {shape:[0.46,0.60,0.73,0.85,0.95,1.00]},
+  pul: {shape:[0.58,0.70,0.81,0.90,0.97,1.00]},
+  zac: {shape:[0.62,0.74,0.84,0.92,0.98,1.00]},
+  vla: {shape:[0.65,0.78,0.88,0.95,0.99,1.00]},
+  sch: {shape:[0.52,0.65,0.78,0.88,0.96,1.00]},
+  the: {shape:[0.60,0.73,0.84,0.92,0.98,1.00]},
+  dlo: {shape:[1.05,0.98,0.88,0.80,0.88,1.00]},
+  vit: {shape:[0.70,0.81,0.90,0.97,1.00,1.00]},
+  dem: {shape:[0.83,1.00,0.86,0.90,0.97,1.00]},
+  bar2:{shape:[0.32,0.50,0.68,0.83,0.95,1.00]},
+  zai: {shape:[0.28,0.45,0.64,0.80,0.93,1.00]},
+  gon: {shape:[0.53,0.66,0.78,0.88,0.96,1.00]},
+  nmn: {shape:[0.63,0.80,0.68,0.86,0.95,1.00]},
+  che: {shape:[0.25,0.42,0.60,0.78,0.93,1.00]},
+  bou: {shape:[0.18,0.35,0.56,0.74,0.91,1.00]},
+  mba: {shape:[0.30,0.48,0.66,0.81,0.93,1.00]},
+  lop: {shape:[1.06,1.02,0.98,0.94,0.93,1.00]},
+  sol: {shape:[0.35,0.50,0.66,0.80,0.93,1.00]},
+  and: {shape:[0.78,0.84,0.90,0.95,0.98,1.00]},
+};
+
+// ── STATE ──
+let cash = 10000;
+let prices = {}, fullHistory = {}, shares = {}, costBasis = {};
+let newsLog = [], selected = null, activeTab = 'market';
+let chartType = 'line', chartTf = '1D', tradeQty = 1;
+let leagueFilter = 'All';
+
+// ── HISTORY GENERATION ──
+function genCareerHistory(base, totalPts, vol, profile) {
+  const shape = (profile && profile.shape) ? profile.shape : [0.7,0.8,0.88,0.94,0.98,1.00];
+  const waypoints = shape.map(s => s * base);
+  const a = [];
+  for(let i = 0; i < totalPts; i++) {
+    const t = i / (totalPts - 1);
+    const wIdx = t * (waypoints.length - 1);
+    const lo = Math.floor(wIdx), hi = Math.min(lo + 1, waypoints.length - 1);
+    const frac = wIdx - lo;
+    const target = waypoints[lo] * (1 - frac) + waypoints[hi] * frac;
+    const prev = a.length > 0 ? a[a.length - 1] : target;
+    const shock = (Math.random() - 0.5) * 2.2;
+    const momentum = a.length > 1 ? (prev - a[a.length - 2]) * 0.25 : 0;
+    const jump = Math.random() < 0.04 ? (Math.random() - 0.5) * vol * 5 : 0;
+    const pull = (target - prev) * 0.08;
+    a.push(Math.max(5, prev + pull + shock * vol + momentum + jump));
+  }
+  return a;
+}
+
+const TF_TOTAL_PTS = 300;
+const TF_SLICES = { '5Y': 300, '1Y': 60, '3M': 30, '1M': 15, '1W': 10, '1D': 78 };
+
+PLAYERS.forEach(p => {
+  const vol = p.base * 0.012 * p.vol;
+  const profile = CAREER_PROFILES[p.id];
+  const full5Y = genCareerHistory(p.base, TF_TOTAL_PTS, vol, profile);
+  fullHistory[p.id] = {};
+  TIMEFRAMES.forEach(tf => {
+    if(tf.key === '1D') {
+      const dayVol = vol * 0.25;
+      const lastPrice = full5Y.at(-1);
+      const intraday = [lastPrice];
+      for(let i = 1; i < 78; i++) {
+        const prev = intraday[i-1];
+        const drift = (Math.random() - 0.49) * dayVol * 0.4;
+        const tick  = Math.random() < 0.06 ? (Math.random()-0.5)*dayVol*3 : 0;
+        intraday.push(Math.max(5, prev + drift + tick));
+      }
+      fullHistory[p.id]['1D'] = intraday;
+    } else {
+      fullHistory[p.id][tf.key] = full5Y.slice(-TF_SLICES[tf.key]);
+    }
+  });
+  prices[p.id] = fullHistory[p.id]['1D'].at(-1);
+  shares[p.id] = 0;
+  costBasis[p.id] = 0;
+});
+
+// ── FORMATTERS ──
+const fmt = n => '$'+Math.round(n).toLocaleString('en-US');
+const fmtPct = n => (n>=0?'+':'')+n.toFixed(1)+'%';
+
+// ── STATS ──
+function portValue(){ return PLAYERS.reduce((s,p)=>s+shares[p.id]*prices[p.id],0); }
+function updateStats(){
+  const pv=portValue(), tot=cash+pv, pnl=tot-10000;
+  document.getElementById('s-cash').textContent=fmt(cash);
+  document.getElementById('s-port').textContent=fmt(pv);
+  document.getElementById('s-total').textContent=fmt(tot);
+  const el=document.getElementById('s-pnl');
+  el.textContent=(pnl>=0?'+':'')+fmt(Math.abs(pnl));
+  el.className='pstat-value '+(pnl>=0?'up':'dn');
+}
+
+// ── TICKER ──
+function buildTicker(){
+  const items = PLAYERS.map(p=>{
+    const h=fullHistory[p.id]['1D'];
+    const prev=h.length>1?h.at(-2):p.base;
+    const chg=(prices[p.id]-prev)/prev*100;
+    return `<span class="tick-item"><span class="tick-name">${p.name}</span><span class="tick-price">${fmt(prices[p.id])}</span><span class="tick-chg ${chg>=0?'tick-up':'tick-dn'}">${fmtPct(chg)}</span></span><span class="tick-sep">·</span>`;
+  }).join('');
+  const t=document.getElementById('ticker-track');
+  t.innerHTML=items+items;
+}
+
+// ── LEAGUE FILTER ──
+function buildLeagueFilter(){
+  document.getElementById('league-bar').innerHTML=LEAGUES.map(l=>
+    `<button class="lf-btn${l===leagueFilter?' active':''}" onclick="setLeague('${l}')">${l}</button>`
+  ).join('');
+}
+function setLeague(l){ leagueFilter=l; buildLeagueFilter(); renderMarket(); }
+
+// ── MINI SPARKLINE ──
+function miniSpark(id, w, h){
+  const data=fullHistory[id]['1D'];
+  if(data.length<2) return '';
+  const min=Math.min(...data),max=Math.max(...data),rng=max-min||1;
+  const pad=2,ch=h-pad*2;
+  const pts=data.map((v,i)=>[(i/(data.length-1))*w, pad+ch-((v-min)/rng)*ch]);
+  let d=`M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+  for(let i=1;i<pts.length;i++){
+    const p0=pts[Math.max(0,i-2)],p1=pts[i-1],p2=pts[i],p3=pts[Math.min(pts.length-1,i+1)];
+    d+=` C ${(p1[0]+(p2[0]-p0[0])/6).toFixed(1)} ${(p1[1]+(p2[1]-p0[1])/6).toFixed(1)}, ${(p2[0]-(p3[0]-p1[0])/6).toFixed(1)} ${(p2[1]-(p3[1]-p1[1])/6).toFixed(1)}, ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+  }
+  const up=data.at(-1)>=data[0];
+  const col=up?'#2ECC8A':'#E05252';
+  const fill=up?'rgba(46,204,138,0.12)':'rgba(224,82,82,0.10)';
+  return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+    <path d="${d} L ${pts.at(-1)[0].toFixed(1)} ${h} L ${pts[0][0].toFixed(1)} ${h} Z" fill="${fill}"/>
+    <path d="${d}" fill="none" stroke="${col}" stroke-width="1.4" stroke-linecap="round"/>
+  </svg>`;
+}
+
+// ── FULL CHART ──
+function fullChart(id, w, h, type, tf){
+  const raw = fullHistory[id][tf];
+  if(!raw||raw.length<2) return '';
+  const padT=10,padB=18,padL=4,padR=4;
+  const cw=w-padL-padR, ch=h-padT-padB;
+
+  if(type==='line'){
+    const min=Math.min(...raw)*0.997, max=Math.max(...raw)*1.003, rng=max-min||1;
+    const yOf=v=>padT+ch-((v-min)/rng)*ch;
+    const xOf=i=>padL+(i/(raw.length-1))*cw;
+    const pts=raw.map((v,i)=>[xOf(i),yOf(v)]);
+    let d=`M ${pts[0][0].toFixed(1)} ${pts[0][1].toFixed(1)}`;
+    for(let i=1;i<pts.length;i++){
+      const p0=pts[Math.max(0,i-2)],p1=pts[i-1],p2=pts[i],p3=pts[Math.min(pts.length-1,i+1)];
+      d+=` C ${(p1[0]+(p2[0]-p0[0])/5).toFixed(1)} ${(p1[1]+(p2[1]-p0[1])/5).toFixed(1)}, ${(p2[0]-(p3[0]-p1[0])/5).toFixed(1)} ${(p2[1]-(p3[1]-p1[1])/5).toFixed(1)}, ${p2[0].toFixed(1)} ${p2[1].toFixed(1)}`;
+    }
+    const up=raw.at(-1)>=raw[0];
+    const col=up?'#2ECC8A':'#E05252';
+    const fill=up?'rgba(46,204,138,0.10)':'rgba(224,82,82,0.09)';
+    const [lx,ly]=[pts.at(-1)[0],pts.at(-1)[1]];
+    const ylbls=[min,(min+max)/2,max].map(v=>({y:yOf(v),t:'$'+Math.round(v).toLocaleString()}));
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      <path d="${d} L ${lx.toFixed(1)} ${padT+ch} L ${pts[0][0].toFixed(1)} ${padT+ch} Z" fill="${fill}"/>
+      <path d="${d}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="${lx.toFixed(1)}" cy="${ly.toFixed(1)}" r="3" fill="${col}"/>
+      ${ylbls.map(l=>`<text x="${padL+2}" y="${l.y.toFixed(1)}" font-family="JetBrains Mono,monospace" font-size="7.5" fill="rgba(245,245,240,0.28)" dominant-baseline="middle">${l.t}</text>`).join('')}
+    </svg>`;
+  }
+
+  if(type==='candle'){
+    const barCount=Math.min(55,raw.length);
+    const step=Math.max(1,Math.floor(raw.length/barCount));
+    const bars=[];
+    for(let i=0;i<raw.length-step;i+=step){
+      const sl=raw.slice(i,i+step);
+      const o=sl[0],c=sl.at(-1);
+      const spread=(Math.abs(c-o)*0.5+Math.abs(c)*0.006);
+      bars.push({o,c,h:Math.max(o,c)+spread*(0.4+Math.random()*0.9),l:Math.min(o,c)-spread*(0.4+Math.random()*0.9)});
+    }
+    const allV=bars.flatMap(b=>[b.h,b.l]);
+    const min=Math.min(...allV)*0.997,max=Math.max(...allV)*1.003,rng=max-min||1;
+    const yOf=v=>padT+ch-((v-min)/rng)*ch;
+    const bw=Math.max(2,Math.floor(cw/bars.length*0.58));
+    const gap=cw/bars.length;
+    const ylbls=[min,(min+max)/2,max].map(v=>({y:yOf(v),t:'$'+Math.round(v).toLocaleString()}));
+    return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+      ${bars.map((b,i)=>{
+        const cx=(padL+gap*i+gap/2).toFixed(1);
+        const col=b.c>=b.o?'#2ECC8A':'#E05252';
+        const top=yOf(Math.max(b.o,b.c)),bot=yOf(Math.min(b.o,b.c));
+        const bh=Math.max(1.5,bot-top);
+        return `<line x1="${cx}" y1="${yOf(b.h).toFixed(1)}" x2="${cx}" y2="${yOf(b.l).toFixed(1)}" stroke="${col}" stroke-width="1" opacity="0.65"/>
+<rect x="${(parseFloat(cx)-bw/2).toFixed(1)}" y="${top.toFixed(1)}" width="${bw}" height="${bh.toFixed(1)}" fill="${col}" rx="1"/>`;
+      }).join('')}
+      ${ylbls.map(l=>`<text x="${padL+2}" y="${l.y.toFixed(1)}" font-family="JetBrains Mono,monospace" font-size="7.5" fill="rgba(245,245,240,0.28)" dominant-baseline="middle">${l.t}</text>`).join('')}
+    </svg>`;
+  }
+  return '';
+}
+
+function setChartType(t){ chartType=t; renderTradeArea(); }
+function setChartTf(tf){ chartTf=tf; renderTradeArea(); }
+
+// ── MARKET RENDER ──
+function renderMarket(){
+  const q=(document.getElementById('search-input').value||'').toLowerCase().trim();
+  const filtered=PLAYERS.filter(p=>{
+    const leagueOk=leagueFilter==='All'||p.league===leagueFilter;
+    const searchOk=!q||p.name.toLowerCase().includes(q)||p.full.toLowerCase().includes(q)||p.club.toLowerCase().includes(q)||p.pos.toLowerCase().includes(q);
+    return leagueOk&&searchOk;
+  });
+  document.getElementById('results-count').textContent=`${filtered.length} player${filtered.length!==1?'s':''}`;
+  const grid=document.getElementById('player-grid');
+  if(!filtered.length){
+    grid.innerHTML=`<div class="no-results">No players match your search.</div>`;
+    document.getElementById('trade-area').innerHTML='';
+    return;
+  }
+  grid.innerHTML=filtered.map(p=>{
+    const h=fullHistory[p.id]['1D'];
+    const prev=h.length>1?h.at(-2):p.base;
+    const chg=(prices[p.id]-prev)/prev*100;
+    const up=chg>=0,sel=selected===p.id;
+    return `<div class="player-card${sel?' selected':''}" onclick="selectPlayer('${p.id}')">
+      <div class="pc-top">
+        <div class="pc-avatar">${p.init}</div>
+        <div style="flex:1;min-width:0">
+          <div class="pc-name">${p.name}</div>
+          <div class="pc-club">${p.club}</div>
+        </div>
+        <span class="pc-pos">${p.pos}</span>
+      </div>
+      <div class="pc-price-row">
+        <span class="pc-price">${fmt(prices[p.id])}</span>
+        <span class="pc-chg ${up?'up':'dn'}">${up?'▲':'▼'} ${Math.abs(chg).toFixed(1)}%</span>
+      </div>
+      <div style="margin:4px 0 2px">${miniSpark(p.id,176,28)}</div>
+      <div class="pc-league">${p.league}</div>
+      ${shares[p.id]>0?`<div class="pc-holdings">${shares[p.id]} share${shares[p.id]>1?'s':''} held</div>`:''}
+    </div>`;
+  }).join('');
+  renderTradeArea();
+}
+
+function selectPlayer(id){ selected=selected===id?null:id; renderMarket(); }
+function deselectPlayer(){ selected=null; renderMarket(); }
+
+// ── TRADE PANEL ──
+function renderTradeArea(){
+  const area=document.getElementById('trade-area');
+  if(!selected){ area.innerHTML=`<div class="trade-panel"><div class="empty-trade"><span class="icon">◎</span>Select a player to open chart &amp; trade</div></div>`; return; }
+  const p=PLAYERS.find(x=>x.id===selected);
+  const h1=fullHistory[p.id]['1D'];
+  const prev=h1.length>1?h1.at(-2):p.base;
+  const chg=prices[p.id]-prev, chgPct=(chg/prev*100).toFixed(2), up=chg>=0;
+  const tfBtns=TIMEFRAMES.map(tf=>`<button class="ctrl-btn${chartTf===tf.key?' active':''}" onclick="setChartTf('${tf.key}')">${tf.label}</button>`).join('');
+  const typeBtns=['line','candle'].map(t=>`<button class="ctrl-btn${chartType===t?' active':''}" onclick="setChartType('${t}')">${t==='line'?'Line':'Candles'}</button>`).join('');
+  area.innerHTML=`<div class="trade-panel">
+    <div class="trade-header">
+      <div>
+        <div class="trade-player-name">${p.full||p.name}</div>
+        <div style="font-family:var(--font-mono);font-size:0.65rem;color:var(--text-muted);margin-top:2px">${p.club} · ${p.league} · ${p.pos}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;flex-shrink:0">
+        <div style="text-align:right">
+          <div style="font-family:var(--font-display);font-size:1.1rem;font-weight:700">${fmt(prices[p.id])}</div>
+          <div style="font-family:var(--font-mono);font-size:0.68rem;padding:1px 7px;border-radius:3px;background:${up?'var(--green-dim)':'var(--red-dim)'};color:${up?'var(--green)':'var(--red)'};">${up?'▲':'▼'} ${Math.abs(chgPct)}%</div>
+        </div>
+        <button onclick="deselectPlayer()" style="background:none;border:none;color:var(--text-dim);font-size:1rem;cursor:pointer;padding:4px;line-height:1">✕</button>
+      </div>
+    </div>
+    <div class="chart-controls"><div class="ctrl-grp">${tfBtns}</div><div class="ctrl-grp">${typeBtns}</div></div>
+    <div class="chart-box">${fullChart(p.id,566,155,chartType,chartTf)}</div>
+    <div class="trade-grid">
+      <div class="trade-field"><label>Shares</label><input type="number" id="t-qty" min="1" max="9999" value="${tradeQty}" oninput="tradeQty=parseInt(this.value)||1;updateCostLine()"/></div>
+      <div class="trade-field"><label>Order type</label><select id="t-type"><option value="market">Market</option></select></div>
+    </div>
+    <div class="trade-cost-line" id="cost-line">
+      <span>Total cost: <strong>${fmt(prices[p.id])}</strong></span>
+      <span>Holdings: <strong>${shares[selected]}</strong> share${shares[selected]!==1?'s':''}</span>
+    </div>
+    <div class="trade-btns">
+      <button class="btn-buy" onclick="trade('buy')">Buy</button>
+      <button class="btn-sell" onclick="trade('sell')">Sell</button>
+    </div>
+  </div>`;
+}
+
+function updateCostLine(){
+  if(!selected) return;
+  const qty=parseInt(document.getElementById('t-qty').value)||1;
+  document.getElementById('cost-line').innerHTML=`<span>Total cost: <strong>${fmt(qty*prices[selected])}</strong></span><span>Holdings: <strong>${shares[selected]}</strong> share${shares[selected]!==1?'s':''}</span>`;
+}
+
+function trade(dir){
+  if(!selected) return;
+  const qty = tradeQty;
+  const p=PLAYERS.find(x=>x.id===selected);
+  const cost=qty*prices[p.id];
+  if(dir==='buy'){
+    if(cash<cost){showToast('Insufficient cash for this order.');return;}
+    cash-=cost; shares[p.id]+=qty; costBasis[p.id]+=cost;
+    showToast(`Bought ${qty} share${qty>1?'s':''} of ${p.name}`);
+  } else {
+    if(shares[p.id]<qty){showToast("You don't hold enough shares.");return;}
+    const proceeds=qty*prices[p.id];
+    const avgCost=costBasis[p.id]/shares[p.id];
+    cash+=proceeds; shares[p.id]-=qty; costBasis[p.id]=Math.max(0,costBasis[p.id]-avgCost*qty);
+    showToast(`Sold ${qty} share${qty>1?'s':''} — ${fmt(Math.round(proceeds))} received`);
+  }
+  // Update stats + holdings badge on card without re-rendering whole trade panel
+  updateStats();
+  buildTicker();
+  saveProgress(); // persist after every trade
+  // Refresh just the player card holdings label and cost line
+  const card = document.querySelector(`.player-card[onclick="selectPlayer('${selected}')"]`);
+  if(card){
+    const hEl = card.querySelector('.pc-holdings');
+    if(shares[p.id]>0){
+      if(hEl) hEl.textContent=`${shares[p.id]} share${shares[p.id]>1?'s':''} held`;
+      else { const d=document.createElement('div'); d.className='pc-holdings'; d.textContent=`${shares[p.id]} share${shares[p.id]>1?'s':''} held`; card.appendChild(d); }
+    } else { if(hEl) hEl.remove(); }
+  }
+  updateCostLine();
+  if(activeTab==='portfolio') renderPortfolio();
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  PROGRESS SAVE / LOAD  — localStorage persistence
+// ═══════════════════════════════════════════════════════════════
+const SAVE_KEY = 'kom_save_v1';
+
+function saveProgress(){
+  try {
+    const data = {
+      cash,
+      shares: Object.fromEntries(PLAYERS.map(p => [p.id, shares[p.id]])),
+      costBasis: Object.fromEntries(PLAYERS.map(p => [p.id, costBasis[p.id]])),
+      prices: Object.fromEntries(PLAYERS.map(p => [p.id, prices[p.id]])),
+      savedAt: Date.now(),
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch(e) { console.warn('Save failed:', e); }
+}
+
+function loadProgress(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const data = JSON.parse(raw);
+    if(!data || !data.shares) return false;
+
+    cash = data.cash ?? 10000;
+    PLAYERS.forEach(p => {
+      if(data.shares[p.id] !== undefined)    shares[p.id]    = data.shares[p.id];
+      if(data.costBasis[p.id] !== undefined) costBasis[p.id] = data.costBasis[p.id];
+      // Restore saved price as starting point for today's chart
+      if(data.prices[p.id] !== undefined){
+        prices[p.id] = data.prices[p.id];
+        // Patch the last point of 1D history so chart starts from saved price
+        const hist = fullHistory[p.id]['1D'];
+        hist[hist.length - 1] = prices[p.id];
+      }
+    });
+
+    const age = Math.round((Date.now() - data.savedAt) / 60000);
+    const ageStr = age < 60 ? `${age}m ago` : `${Math.round(age/60)}h ago`;
+    showSaveBadge(`Progress restored · saved ${ageStr}`);
+    return true;
+  } catch(e) { console.warn('Load failed:', e); return false; }
+}
+
+function resetProgress(){
+  if(!confirm('Reset all progress? This will clear your portfolio and restore $10,000 cash.')) return;
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+function showSaveBadge(msg){
+  const el = document.getElementById('save-badge');
+  if(!el) return;
+  el.textContent = msg;
+  el.style.opacity = '1';
+  setTimeout(() => { el.style.opacity = '0'; }, 3500);
+}
+
+// ── PORTFOLIO ──
+function renderPortfolio(){
+  const held=PLAYERS.filter(p=>shares[p.id]>0);
+  const el=document.getElementById('holdings-list');
+  if(!held.length){el.innerHTML=`<div class="holdings-empty">No positions yet.<br/>Go to Market to open your first trade.</div>`;return;}
+  el.innerHTML=`<div class="holdings-list">${held.map(p=>{
+    const val=shares[p.id]*prices[p.id];
+    const pnl=val-costBasis[p.id];
+    const pct=costBasis[p.id]>0?pnl/costBasis[p.id]*100:0;
+    const up=pnl>=0;
+    return `<div class="holding">
+      <div><div class="holding-name">${p.name}</div><div class="holding-meta">${shares[p.id]} sh · ${p.club} · ${p.league}</div></div>
+      <div>
+        <div class="holding-value ${up?'txt-up':'txt-dn'}">${fmt(Math.round(val))}</div>
+        <div class="holding-pnl ${up?'txt-up':'txt-dn'}">${up?'+':''}${fmt(Math.round(Math.abs(pnl)))} (${fmtPct(pct)})</div>
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+// ── NEWS RENDER ──
+function renderNews(){
+  const el=document.getElementById('news-panel');
+  const items=[...newsLog].reverse().slice(0,20);
+  if(!items.length){el.innerHTML=`<div class="news-empty">Awaiting first news event…</div>`;return;}
+  el.innerHTML=`<div class="news-list">${items.map(n=>`<div class="news-item">
+    <div class="news-dot ${DOT_CLASS[n.type]||'dot-form'}"></div>
+    <div class="news-body">
+      <div class="news-type ${TYPE_CLASS[n.type]||'nt-form'}">${TYPE_LABEL[n.type]||'📰 News'}</div>
+      <div class="news-text">${n.text}</div>
+      <div class="news-impact">${n.impact}</div>
+      ${n.playerName?`<div class="news-player-tag">↳ ${n.playerName}</div>`:''}
+    </div>
+  </div>`).join('')}</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  FAKE NEWS ENGINE — generates realistic random football events
+// ═══════════════════════════════════════════════════════════════
+const CLUBS_ELITE = ['Real Madrid','Man City','PSG','Bayern Munich'];
+const CLUBS_TOP   = ['Arsenal','Liverpool','Chelsea','Barcelona','Inter Milan','Borussia Dortmund','Man Utd'];
+const CLUBS_MID   = ['Atletico Madrid','Newcastle','Bayer Leverkusen','Napoli','Tottenham','Aston Villa','AC Milan','Juventus','Roma','Lazio'];
+
+const NATIONAL_TEAMS = {
+  'Premier League': ['England','Nigeria','Ghana','Ivory Coast','Norway','Austria','Denmark','Brazil','Portugal','Germany'],
+  'La Liga':        ['Spain','France','Croatia','Uruguay','Argentina','Brazil'],
+  'Bundesliga':     ['Germany','France','Ghana','Switzerland','Canada','Brazil','Switzerland'],
+  'Serie A':        ['Italy','Argentina','Georgia','Belgium','France','Brazil'],
+  'Ligue 1':        ['France','Portugal','Spain','Senegal','Guinea'],
+};
+
+const INJURY_TYPES = [
+  {label:'hamstring strain', days:'3–4 weeks', delta:-18},
+  {label:'ankle sprain', days:'2–3 weeks', delta:-14},
+  {label:'muscle tear', days:'6–8 weeks', delta:-28},
+  {label:'knee ligament injury', days:'8–12 weeks', delta:-35},
+  {label:'thigh strain', days:'10–14 days', delta:-10},
+  {label:'calf injury', days:'2 weeks', delta:-12},
+  {label:'back spasm', days:'1 week', delta:-7},
+  {label:'concussion', days:'7–10 days', delta:-9},
+  {label:'fractured toe', days:'4–6 weeks', delta:-20},
+  {label:'shoulder dislocation', days:'6 weeks', delta:-22},
+];
+
+const RECOVERY_PHRASES = [
+  'returns to training ahead of schedule',
+  'clears fitness tests and rejoins squad',
+  'declared fit after scan results return clear',
+  'makes full recovery, set to feature this weekend',
+];
+
+const GOAL_CONTEXTS = [
+  'fires home a brilliant solo effort vs', 'converts from the spot against', 'heads in the opener vs',
+  'curls a stunning free-kick past the keeper vs', 'taps in the rebound to make it 2–0 vs',
+  'breaks the deadlock with a clinical finish vs', 'nets a brace in the 4–1 win over',
+  'rounds the keeper to seal a late winner vs', 'scores his 20th league goal of the season vs',
+  'latches onto a through ball to level it vs',
+];
+
+const OPPONENTS = [
+  'Sevilla','Wolves','Brest','Augsburg','Frosinone','Lecce','Metz','Almería',
+  'Heidenheim','Sheffield Utd','Burnley','Luton','Montpellier','Lorient',
+];
+
+const AWARD_EVENTS = [
+  {text:'named Player of the Month by the league panel', delta:+8, type:'form'},
+  {text:'earns a spot in UEFA Team of the Week', delta:+6, type:'form'},
+  {text:'wins the MOTM award for the third consecutive game', delta:+7, type:'form'},
+  {text:'voted into the league Team of the Season shortlist', delta:+10, type:'form'},
+  {text:'surpasses his previous career-best goals tally this season', delta:+9, type:'form'},
+  {text:'recorded the highest dribble completion rate in Europe this month', delta:+5, type:'form'},
+];
+
+const SUSPENSION_EVENTS = [
+  {text:'handed a 3-match ban following his red card last weekend', delta:-15, type:'injury'},
+  {text:'suspended for two games after accumulating five yellow cards', delta:-10, type:'injury'},
+  {text:'appeal against red card dismissed — ban stands', delta:-12, type:'injury'},
+];
+
+const TRANSFER_RUMOURS = [
+  {text:'linked with a summer move to {to} as negotiations open', factor:0.5},
+  {text:'subject of a formal bid from {to} reported at €{fee}M', factor:0.8},
+  {text:'agrees personal terms with {to} — deal expected to be confirmed this week', factor:1.0},
+  {text:'completes move to {to} in a deal worth €{fee}M', factor:1.0},
+  {text:'expected to leave {from} at end of season — {to} frontrunners', factor:0.6},
+];
+
+const CALLUP_EVENTS = [
+  'called up to the national team squad for the upcoming internationals',
+  'earns first senior international call-up after outstanding club form',
+  'recalled to the national squad after six-month absence',
+  'included in the extended squad for the Nations League campaign',
+  'named captain of the national side for the upcoming friendlies',
+];
+
+const DROPPING_EVENTS = [
+  {text:'dropped to the bench amid reported falling out with manager', delta:-8, type:'form'},
+  {text:'left out of the squad entirely for next fixture due to tactical reasons', delta:-6, type:'form'},
+  {text:'reportedly seeking a transfer amid lack of playing time', delta:-5, type:'transfer'},
+  {text:'loses his place in the starting XI to summer signing', delta:-7, type:'form'},
+];
+
+function rand(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function randFee(min,max){ return Math.floor(Math.random()*(max-min)+min); }
+
+function generateNewsEvent(){
+  const p = rand(PLAYERS);
+  const roll = Math.random();
+
+  // ── GOAL (25%) ──
+  if(roll < 0.25){
+    const ctx = rand(GOAL_CONTEXTS);
+    const opp = rand(OPPONENTS);
+    const delta = 10 + Math.floor(Math.random()*8);
+    return {
+      text: `${p.full} ${ctx} ${opp}.`,
+      impact: `+${delta}% market surge on match performance`,
+      type: 'goal', playerName: p.name, pid: p.id, delta
+    };
+  }
+
+  // ── INJURY (20%) ──
+  if(roll < 0.45){
+    const inj = rand(INJURY_TYPES);
+    return {
+      text: `${p.full} ruled out with a ${inj.label} — expected to miss ${inj.days}.`,
+      impact: `${inj.delta}% sharp sell-off on injury news`,
+      type: 'injury', playerName: p.name, pid: p.id, delta: inj.delta
+    };
+  }
+
+  // ── RECOVERY (10%) ──
+  if(roll < 0.55){
+    const phrase = rand(RECOVERY_PHRASES);
+    const delta = 6 + Math.floor(Math.random()*7);
+    return {
+      text: `${p.full} ${phrase} and is available for selection.`,
+      impact: `+${delta}% recovery bounce`,
+      type: 'form', playerName: p.name, pid: p.id, delta
+    };
+  }
+
+  // ── TRANSFER (18%) ──
+  if(roll < 0.73){
+    // Pick a destination different from current club
+    const allClubs = [...CLUBS_ELITE, ...CLUBS_TOP, ...CLUBS_MID].filter(c => c !== p.club);
+    const toClub = rand(allClubs);
+    const fromClub = p.club;
+    const baseDelta = transferDelta(fromClub, toClub);
+    const rumour = rand(TRANSFER_RUMOURS);
+    const fee = randFee(20, 150);
+    const text = rumour.text
+      .replace('{to}', toClub)
+      .replace('{from}', fromClub)
+      .replace('{fee}', fee);
+    const delta = Math.round(baseDelta * (0.7 + rumour.factor * 0.3));
+    const impactLabel = delta > 0
+      ? `+${delta}% on upgrade transfer speculation`
+      : `${delta}% on downward move concerns`;
+    return {
+      text: `${p.full} ${text}.`,
+      impact: impactLabel,
+      type: 'transfer', playerName: p.name, pid: p.id, delta
+    };
+  }
+
+  // ── NATIONAL TEAM CALL-UP (12%) ──
+  if(roll < 0.85){
+    const leagueNats = NATIONAL_TEAMS[p.league] || ['their national side'];
+    const nat = rand(leagueNats);
+    const phrase = rand(CALLUP_EVENTS);
+    const delta = 4 + Math.floor(Math.random()*6);
+    return {
+      text: `${p.full} ${phrase} by ${nat}.`,
+      impact: `+${delta}% on international recognition`,
+      type: 'callup', playerName: p.name, pid: p.id, delta
+    };
+  }
+
+  // ── FORM/AWARD (7%) ──
+  if(roll < 0.92){
+    const award = rand(AWARD_EVENTS);
+    return {
+      text: `${p.full} ${award.text}.`,
+      impact: `+${award.delta}% form boost`,
+      type: award.type, playerName: p.name, pid: p.id, delta: award.delta
+    };
+  }
+
+  // ── SUSPENSION (4%) ──
+  if(roll < 0.96){
+    const susp = rand(SUSPENSION_EVENTS);
+    return {
+      text: `${p.full} ${susp.text}.`,
+      impact: `${susp.delta}% on availability concern`,
+      type: susp.type, playerName: p.name, pid: p.id, delta: susp.delta
+    };
+  }
+
+  // ── DROPPING (4%) ──
+  const drop = rand(DROPPING_EVENTS);
+  return {
+    text: `${p.full} ${drop.text}.`,
+    impact: `${drop.delta}% on squad role uncertainty`,
+    type: drop.type, playerName: p.name, pid: p.id, delta: drop.delta
+  };
+}
+
+// ── APPLY A NEWS EVENT TO PRICES & UI ──
+function applyNewsEvent(event){
+  const pid = event.pid;
+  const delta = event.delta;
+  prices[pid] = Math.max(5, prices[pid] * (1 + delta / 100));
+  fullHistory[pid]['1D'].push(prices[pid]);
+  if(fullHistory[pid]['1D'].length > 150) fullHistory[pid]['1D'].shift();
+  event.ts = Date.now();
+  newsLog.push(event);
+  if(newsLog.length > 60) newsLog.shift();
+  if(shares[pid] > 0){
+    showToast(`${delta>=0?'📈':'📉'} ${event.playerName}: ${delta>=0?'+':''}${delta}%`);
+  }
+  renderNews(); buildTicker(); updateStats();
+  if(activeTab==='market') renderMarket();
+  if(activeTab==='portfolio') renderPortfolio();
+}
+
+function fireFakeNews(){
+  const event = generateNewsEvent();
+  setNewsStatus('sim');
+  applyNewsEvent(event);
+}
+
+// ═══════════════════════════════════════════════════════════════
+//  CLAUDE API — LIVE FOOTBALL NEWS ENGINE
+// ═══════════════════════════════════════════════════════════════
+// API key lives server-side in Netlify function
+let liveNewsFetchInterval = null;
+let liveFetchIntervalMinutes = 8;
+let isFetchingLive = false;
+let lastLiveFetch = 0;
+
+const PLAYER_ID_MAP = Object.fromEntries(PLAYERS.map(p => [p.full, p.id]));
+const PLAYER_NAMES_STR = PLAYERS.map(p => p.full).join(', ');
+
+async function fetchLiveNewsFromClaude(){
+  if(isFetchingLive) return false;
+  if(Date.now() - lastLiveFetch < 60000) return false;
+  isFetchingLive = true;
+  lastLiveFetch = Date.now();
+  setNewsStatus('fetching');
+
+  const picks = [...PLAYERS].sort(()=>Math.random()-0.5).slice(0,6).map(p=>p.full).join(', ');
+
+  const systemPrompt = `You are a football market data analyst. Use web search to find the LATEST real news (past 48 hours) about these players: ${picks}.
+Search for: goals, assists, injuries, transfer news, suspensions, national team call-ups, manager comments, form.
+
+Return ONLY a raw JSON array — no markdown, no code fences. Schema:
+[{"playerName":"exact full name","text":"one factual sentence","type":"goal|injury|transfer|form|callup","delta":-35 to 35,"impact":"e.g. +14% brace vs Arsenal"}]
+
+Delta guide: goal scored=+12 to +18, brace=+18 to +25, injury=−10 to −35, transfer to elite club=+15 to +25, transfer down=−10 to −20, red card/suspension=−10 to −18, call-up=+4 to +10, award/form=+4 to +10.
+Only report real news you found. playerName must exactly match one of: ${PLAYER_NAMES_STR}
+Return 1–6 items max, or [] if nothing found. Start with [ end with ].`;
+
+  try {
+    const res = await fetch('/.netlify/functions/claude-proxy', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-6',
+        max_tokens: 1000,
+        tools: [{type: 'web_search_20250305', name: 'web_search'}],
+        system: systemPrompt,
+        messages: [{role: 'user', content: 'Search for latest football news on those players and return the JSON array.'}]
+      })
+    });
+
+    if(!res.ok){
+      const err = await res.json().catch(()=>({}));
+      const msg = err?.error?.message || `HTTP ${res.status}`;
+      console.warn('Claude API error:', msg);
+      if(res.status === 401) setApiKeyStatus('err', 'Invalid API key — check in settings ⚙');
+      else if(res.status === 429) setNewsStatus('rate-limited');
+      else setNewsStatus('error');
+      isFetchingLive = false; return false;
+    }
+
+    const data = await res.json();
+    const textBlocks = (data.content || []).filter(b => b.type === 'text').map(b => b.text).join('');
+    const cleaned = textBlocks.replace(/```json|```/g, '').trim();
+    const si = cleaned.indexOf('['), ei = cleaned.lastIndexOf(']');
+    if(si === -1 || ei === -1){ isFetchingLive = false; setNewsStatus('live'); return true; }
+
+    const items = JSON.parse(cleaned.slice(si, ei+1));
+    if(!Array.isArray(items) || items.length === 0){ isFetchingLive = false; setNewsStatus('live'); return true; }
+
+    let applied = 0;
+    items.forEach(item => {
+      const pid = PLAYER_ID_MAP[item.playerName];
+      if(!pid) return;
+      const delta = Math.max(-40, Math.min(40, parseInt(item.delta) || 0));
+      applyNewsEvent({ text: item.text, impact: item.impact || `${delta>=0?'+':''}${delta}% on live news`,
+        type: item.type || 'form', playerName: item.playerName, pid, delta, source: 'live' });
+      applied++;
+    });
+
+    console.log(`✅ Live news: ${applied} events`);
+    setNewsStatus('live');
+    isFetchingLive = false;
+    return true;
+  } catch(e) {
+    console.error('Live news error:', e);
+    setNewsStatus('error');
+    isFetchingLive = false;
+    return false;
+  }
+}
+
+function setNewsStatus(state){
+  const el = document.getElementById('news-status');
+
+  const t = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  if(state === 'live'){
+    el.textContent = `live · ${t}`; el.style.color = 'var(--green)';
+
+  } else if(state === 'fetching'){
+    el.textContent = 'fetching live news…'; el.style.color = 'var(--text-dim)';
+  } else if(state === 'sim'){
+    el.textContent = `sim · ${t}`; el.style.color = 'var(--text-dim)';
+
+  } else if(state === 'rate-limited'){
+    el.textContent = 'rate limited — retrying later'; el.style.color = 'var(--red)';
+  } else {
+    el.textContent = `error · ${t}`; el.style.color = 'var(--red)';
+  }
+}
+
+async function runNewsEvent(){
+  const ok = await fetchLiveNewsFromClaude();
+  if(!ok) fireFakeNews();
+}
+
+// startLiveNewsSchedule defined in init section below
+
+// ── SETTINGS MODAL ──
+
+
+
+
+// ── MARKET NOISE ──
+function marketNoise(){
+  PLAYERS.forEach(p=>{
+    const vol=p.base*0.008*p.vol;
+    const drift=(Math.random()-0.48)*vol;
+    prices[p.id]=Math.max(5,prices[p.id]+drift);
+    fullHistory[p.id]['1D'].push(prices[p.id]);
+    if(fullHistory[p.id]['1D'].length>150) fullHistory[p.id]['1D'].shift();
+  });
+  buildTicker(); updateStats();
+  if(activeTab==='market') renderMarket();
+  if(activeTab==='portfolio') renderPortfolio();
+}
+
+// ── TAB SWITCH ──
+function switchTab(name,btn){
+  activeTab=name;
+  document.getElementById('tab-market').style.display=name==='market'?'block':'none';
+  document.getElementById('tab-portfolio').style.display=name==='portfolio'?'block':'none';
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  if(name==='portfolio') renderPortfolio();
+  if(name==='market') renderMarket();
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── INIT ──
+buildLeagueFilter();
+loadProgress(); // restore saved portfolio before first render
+buildTicker();
+renderMarket();
+updateStats();
+
+// Market noise every 4s — keeps prices moving via momentum even between news fetches
+setInterval(marketNoise, 4000);
+
+// On load: show "waiting for first fetch" in news panel, then immediately fetch live news
+document.getElementById('news-panel').innerHTML = `<div class="news-empty" style="padding:2rem;text-align:center">
+  <div style="font-family:var(--font-mono);font-size:0.7rem;color:var(--text-dim);margin-bottom:8px">⏳ Connecting to live news…</div>
+  <div style="font-family:var(--font-mono);font-size:0.62rem;color:var(--text-dim)">Click ⚙ top-right to add your Claude API key</div>
+</div>`;
+
+// Live news: fetch immediately on key save, then every 60 minutes
+// No fake news ever fires — market noise handles price movement between fetches
+function startLiveNewsSchedule(){
+  if(liveNewsFetchInterval) clearInterval(liveNewsFetchInterval);
+  liveNewsFetchInterval = setInterval(fetchLiveNewsFromClaude, 60 * 60 * 1000); // every 60 min
+}
+
+// saveSettings removed — API key is server-side
+
+</script>
+</body>
+</html>
