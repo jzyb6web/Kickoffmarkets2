@@ -1251,7 +1251,8 @@ function startLiveNewsSchedule(){
   if(liveNewsFetchInterval) clearInterval(liveNewsFetchInterval);
   liveNewsFetchInterval = setInterval(fetchLiveNewsFromClaude, 60 * 60 * 1000); // every 60 min
 }
-
+runNewsEvent(); 
+startLiveNewsSchedule();
 // saveSettings removed — API key is server-side
 
 </script>
